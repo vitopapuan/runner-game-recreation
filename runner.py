@@ -48,7 +48,24 @@ class Player(pygame.sprite.Sprite):
     self.apply_gravity()
     self.animation_state()
 
-# def display_score():
+class Enemy(pygame.sprite.Sprite):
+  def __init__(self, type):
+    super().__init__()
+
+    if type == 'fly':
+      fly_1 = pygame.image.load('graphics/Fly/Fly1').convert_alpha()
+      fly_2 = pygame.image.load('graphics/Fly/Fly2').convert_alpha()
+      self.fly_anim = [fly_1, fly_2]
+      self.fly_anime_index = 210
+    # elif 
+
+
+def display_score():
+  current_time = int(pygame.time.get_ticks() / 1000) - start_time
+  score_message = game_font.render(f'Score: {score}', False, (64, 64, 64))
+  score_message_rect = score_message.get_rect(center = (400, 75))
+  SCREEN.blit(score_message, score_message_rect)
+  return current_time
 
 #initiate game
 pygame.init()
@@ -73,8 +90,6 @@ game_subtitle_rect = game_subtitle.get_rect(center = (400, 100))
 
 game_message = game_font.render('Press "Space" to start', False, (64, 64, 64))
 game_message_rect = game_message.get_rect(center = (400, 250))
-score_message = game_font.render('Score: {score}', False, (64, 64, 64))
-score_message_rect = score_message.get_rect(center = (400, 250))
 
 #render background (sky & ground)
 sky_surf = pygame.image.load('graphics/Sky.png').convert()
@@ -86,24 +101,27 @@ player.add(Player())
 
 #game state
 game_active = False
+start_time = 0
 
 while True:
 
 
-  # NEED FIX
   for event in pygame.event.get():
     #how to quit the game
     if event.type == pygame.QUIT:
       pygame.quit()
       exit()
+    
     if game_active:
       if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+        game_active = False
+    else:
+      if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
         pygame.quit()
-        exit()    
-    else:  
-      if event.type == pygame.KEYDOWN and event.type == pygame.K_SPACE:
+        exit()
+      if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
         game_active = True
-        print('Space')
+        start_time = int(pygame.time.get_ticks() / 1000)
 
   #render background
   SCREEN.blit(sky_surf, (0, 0))
@@ -114,18 +132,23 @@ while True:
 
     player.draw(SCREEN)
     player.update()
+
+    score = display_score()
   
   else:
     #game intro/game over
     SCREEN.blit(game_title, game_title_rect)
     SCREEN.blit(game_subtitle, game_subtitle_rect)
+    score_result = game_font.render(f'Score: {score}', False, (64, 64, 64))
+    score_result_rect = score_result.get_rect(center = (400, 250))
+
 
     if score == 0:
       #game message/instruction
       SCREEN.blit(game_message, game_message_rect)
     else:
       #game score
-      SCREEN.blit(score_message, score_message_rect)
+      SCREEN.blit(score_result, score_result_rect)
   
   pygame.display.update()
   game_clock.tick(60)
