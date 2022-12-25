@@ -53,12 +53,34 @@ class Enemy(pygame.sprite.Sprite):
     super().__init__()
 
     if type == 'fly':
-      fly_1 = pygame.image.load('graphics/Fly/Fly1').convert_alpha()
-      fly_2 = pygame.image.load('graphics/Fly/Fly2').convert_alpha()
-      self.fly_anim = [fly_1, fly_2]
-      self.fly_anime_index = 210
-    # elif 
+      fly_1 = pygame.image.load('graphics/Fly/Fly1.png').convert_alpha()
+      fly_2 = pygame.image.load('graphics/Fly/Fly2.png').convert_alpha()
+      self.anim_frames = [fly_1, fly_2]
+      y_pos = 210
+    else:
+      snail_1 = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
+      snail_2 = pygame.image.load('graphics/snail/snail2.png').convert_alpha()
+      self.anim_frames = [snail_1, snail_2]
+      y_pos = 300
 
+    self.anim_index = 0
+    self.image = self.anim_frames[self.anim_index]
+    self.rect = self.image.get_rect(midbottom = (randint(900, 1100), y_pos))
+
+  def animation_state(self):
+    self.anim_index += 0.1
+    if self.anim_index >= len(self.anim_frames):
+      self.anim_index = 0
+    self.image = self.anim_frames[int(self.anim_index)]
+
+  def update(self):
+    self.animation_state()
+    self.rect.x -= 6
+    self.destroy()
+
+  def destroy(self):
+    if self.rect.x <= -100:
+      self.kill()
 
 def display_score():
   current_time = int(pygame.time.get_ticks() / 1000) - start_time
@@ -99,6 +121,11 @@ ground_surf = pygame.image.load('graphics/ground.png').convert()
 player = pygame.sprite.GroupSingle()
 player.add(Player())
 
+#render enemy characters
+enemy = pygame.sprite.Group()
+enemy_timer = pygame.USEREVENT + 1
+pygame.time.set_timer(enemy_timer, 1500)
+
 #game state
 game_active = False
 start_time = 0
@@ -115,6 +142,8 @@ while True:
     if game_active:
       if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
         game_active = False
+      if event.type == enemy_timer:
+        enemy.add(Enemy(choice(['fly', 'snail', 'snail', 'snail'])))
     else:
       if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
         pygame.quit()
@@ -132,6 +161,9 @@ while True:
 
     player.draw(SCREEN)
     player.update()
+
+    enemy.draw(SCREEN)
+    enemy.update()
 
     score = display_score()
   
